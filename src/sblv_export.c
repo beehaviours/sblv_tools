@@ -104,20 +104,22 @@ int main( int argc, char** argv ) {
     c = avcodec_alloc_context3(codec);
     if (!c) return -1;
 
-	c->codec_id = codec->id;
+    c->codec_id = codec->id;
     c->width = header.cols;
     c->height = header.rows;
     c->time_base = (AVRational){1, header.fps};
     c->framerate = (AVRational){header.fps, 1};
     c->gop_size = 12;
     c->max_b_frames = 2;
-    c->pix_fmt = AV_PIX_FMT_GRAY8;
+    c->pix_fmt = AV_PIX_FMT_YUV420P;
 
     if (fmt_ctx->oformat->flags & AVFMT_GLOBALHEADER)
         c->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
 
-    av_opt_set(c->priv_data, "preset", "veryslow", 0);
-	av_opt_set(c->priv_data, "crf", "18", 0);
+    
+
+    av_opt_set(c->priv_data, "crf", "20", 0 );
+
 
     // Ouvre le codec
     ret = avcodec_open2(c, codec, NULL);
@@ -159,12 +161,18 @@ int main( int argc, char** argv ) {
         ret = av_frame_make_writable(frame);
         if (ret < 0) break;
 
-        for (int y = 0; y < header.rows; y++) {
-            memcpy(frame->data[0] + y * frame->linesize[0],
-                   buffer + y * header.cols, header.cols);
-        }
+	for (int y=0; y<header.rows; y++) {
+		memcpy(frame->data[0] + y * frame->linesize[0],
+			buffer + y * header.cols,
+			header.cols );
+	}
 
-        frame->pts = frame_index++;
+	for (int y=0; y<header.rows/2; y++) {
+		memset( frame->data[1] + y * frame->linesize[1], 128, header.cols/2 ) ;
+		memset( frame->data[2] + y * frame->linesize[2], 128, header.cols/2 ) ;
+	}	
+
+	frame->pts = frame_index++;
 
         // Envoi au codec
         ret = avcodec_send_frame(c, frame);
@@ -200,8 +208,10 @@ int main( int argc, char** argv ) {
     av_frame_free(&frame);
     av_packet_free(&pkt);
     avcodec_free_context(&c);
+
     if (!(fmt_ctx->oformat->flags & AVFMT_NOFILE))
         avio_closep(&fmt_ctx->pb);
+
     avformat_free_context(fmt_ctx);
 
 
