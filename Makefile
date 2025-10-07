@@ -25,6 +25,7 @@ distclean:
 
 install:
 	install -D -m 755 build/sblv_print  $(DESTDIR)$(PREFIX)/bin/sblv_print
+	install -D -m 755 build/sblv_export  $(DESTDIR)$(PREFIX)/bin/sblv_export
 	install -D -m 755 build/sblv_extract_one_frame   $(DESTDIR)$(PREFIX)/bin/sblv_extract_one_frame
 
 .PHONY: all clean distclean install
