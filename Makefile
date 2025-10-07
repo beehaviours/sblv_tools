@@ -1,13 +1,13 @@
 CC = gcc
-CFLAGS = -Wall -c `pkg-config --cflags libsbl aravis-0.10 libpng`
+CFLAGS = -Wall -c `pkg-config --cflags libsbl libpng` -I/usr/include/ffmpeg
 
-LDFLAGS = -lm `pkg-config --libs libsbl aravis-0.10 libpng` -lavformat -lavcodec -lavutil
+LDFLAGS = -lm `pkg-config --libs libsbl libpng` -lavformat -lavcodec -lavutil
 
 PREFIX ?= /usr/local
 
 BINARIES = build/sblv_print \
-		   build/sblv_extract_one_frame \
-		   build/sblv_export
+	build/sblv_extract_one_frame \
+	build/sblv_export
 
 all: build $(BINARIES)
 
